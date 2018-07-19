@@ -8,7 +8,7 @@ public class BigFoot : MonoBehaviour {
 
 	float Health, WalkTime , IdleTime, CampTime, feedTime;
 	bool idle, walk, attack, hit, goCamp , feed;
-
+	int WalkCount, IdleCount , CampCount , FeedCount;
 	Vector3 WanderTarget, AttackTarget , PlayerTarget; 
 
 
@@ -23,12 +23,13 @@ public class BigFoot : MonoBehaviour {
 		agent = gameObject.GetComponent<UnityEngine.AI.NavMeshAgent> ();
 
 		Health = 100;
-		WalkTime = 0;
-		IdleTime = 0;
-		CampTime = 0;
-		feedTime = 0;
-		idle = true;
+		WalkTime = IdleTime = CampTime = feedTime = 0;
+		WalkCount = IdleCount = CampCount = FeedCount = 0;
 		walk = attack = hit = goCamp = feed = false;
+
+		idle = true;
+		IdleCount = 1;
+
 		//BigFootAnimator.SetBool ();
 	}
 
@@ -69,23 +70,29 @@ public class BigFoot : MonoBehaviour {
 	}
 	void Idle()
 	{
-		if (IdleTime > 1 ) {		// Idle to Walk
-
+		if (IdleTime > 6.2f ) {		// Idle to Walk
+			BigFootAnimator.SetBool ("Idle", false);
+			BigFootAnimator.SetBool ("Walk", true);
 			idle = false;
 			walk = true;
 			IdleTime = 0f;
-			BigFootAnimator.SetBool ("Idle", false);
-			BigFootAnimator.SetBool ("Walk", true);
+			StartCoroutine(WaitFun(5));
 			SelectWanderTarget ();
-			agent.isStopped = false;
 			agent.SetDestination (WanderTarget);
+			agent.isStopped = false;
+
 
 		}
+		if(Vector3.Distance (gameObject.transform.position ,PlayerTrans.position) < 100) // walk to attack
+		{
+			Attack ();
+		}
+
 		
 	}
 	void Wander ()
 	{
-		if (Vector3.Distance(WanderTarget,gameObject.transform.position) < 5) { // walk to idle
+		if (Vector3.Distance(WanderTarget,gameObject.transform.position) < 15) { // walk to idle
 			walk = false;
 			idle = true;
 			agent.isStopped = true;
@@ -100,6 +107,7 @@ public class BigFoot : MonoBehaviour {
 
 	void Attack()
 	{
+		
 	}
 
 	void ListenFire()
@@ -162,5 +170,10 @@ public class BigFoot : MonoBehaviour {
 		}
 		Vector3 Pos = new Vector3 (x,0f,z);
 		return Pos;
+	}
+
+	IEnumerator WaitFun(int x)
+	{
+		yield return new WaitForSeconds(x);
 	}
 }
